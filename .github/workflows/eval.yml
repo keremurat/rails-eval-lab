@@ -20,11 +20,16 @@ jobs:
         run: |
           echo "Actor: ${{ github.actor }}"
           echo "Event: ${{ github.event_name }}"
-          echo "Token: ${{ secrets.GITHUB_TOKEN }}"
           echo "Fork?: ${{ github.event.pull_request.head.repo.fork }}"
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-               | jq .length
+
+          echo "---- RAW RESPONSE ----"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+
+          echo "---- PARSED ----"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+              | jq
 
       # 1. Checkout MAIN — source of truth for all code except user_data_fetcher.rb
       - name: Checkout main
