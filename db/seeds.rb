@@ -1,13 +1,31 @@
-# Seed data for N+1 query demonstration
-10.times do |i|
-  user = User.create!(name: "User #{i + 1}", email: "user#{i + 1}@example.com")
-  Profile.create!(user: user, bio: "Bio for #{user.name}", avatar_url: "https://example.com/avatar#{i + 1}.png")
+require 'faker'
 
-  3.times do |j|
-    post = Post.create!(user: user, title: "Post #{j + 1} by #{user.name}", body: "Content...", published: [true, false].sample)
+puts "Biraz zaman alabilir, #{200} kullanıcı ve ilişkileri (profile, post, comment) oluşturuluyor..."
+200.times do
+  user = User.create!(
+    name: Faker::Name.name,
+    email: Faker::Internet.unique.email,
+    active: [true, false].sample
+  )
+  
+  Profile.create!(
+    user: user, 
+    bio: Faker::Lorem.paragraph, 
+    avatar_url: Faker::Avatar.image
+  )
 
-    2.times do |k|
-      Comment.create!(post: post, author_name: "Commenter #{k + 1}", body: "Great post!")
+  rand(5..15).times do
+    post = user.posts.create!(
+      title: Faker::Lorem.sentence,
+      body: Faker::Lorem.paragraphs(number: 2).join("\n\n"),
+      published: [true, false].sample
+    )
+    
+    rand(1..3).times do
+      post.comments.create!(
+        author_name: Faker::Name.name,
+        body: Faker::Lorem.sentence
+      )
     end
   end
 end
