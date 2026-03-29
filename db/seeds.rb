@@ -7,13 +7,21 @@ require "faker"
 Faker::Config.random = Random.new(42)
 srand(42)
 
-USER_COUNT = 200
-ACTIVE_RATIO = 0.5 # exactly 100 active users
+user_count   = 200
+active_ratio = 0.5 # exactly 100 active users
 
-puts "Generating #{USER_COUNT} users with profiles, posts, and comments..."
+# Idempotent: wipe and re-seed so baseline is always measured on a clean dataset.
+puts "Cleaning existing data..."
+RunLog.delete_all
+Comment.delete_all
+Post.delete_all
+Profile.delete_all
+User.delete_all
 
-USER_COUNT.times do |i|
-  is_active = i < (USER_COUNT * ACTIVE_RATIO) # first 100 active, rest inactive
+puts "Generating #{user_count} users with profiles, posts, and comments..."
+
+user_count.times do |i|
+  is_active = i < (user_count * active_ratio) # first 100 active, rest inactive
 
   user = User.create!(
     name: Faker::Name.name,
@@ -45,6 +53,7 @@ end
 
 puts "Seeded #{User.count} users, #{Profile.count} profiles, #{Post.count} posts, #{Comment.count} comments"
 puts "Active users: #{User.where(active: true).count}"
+puts ""
 
 # --- Challenge baseline ---
 # After seeding, run Scorer once to capture the actual baseline.

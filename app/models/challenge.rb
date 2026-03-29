@@ -22,6 +22,4 @@ class Challenge < ApplicationRecord
   validates :baseline_queries, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :baseline_time_ms, presence: true, numericality: { greater_than: 0 }
   validates :credit_cost,      presence: true, numericality: { only_integer: true, greater_than: 0 }
-
-  scope :active, -> { where(active: true) }
 end

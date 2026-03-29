@@ -16,7 +16,7 @@ namespace :dojo do
       exit 1
     end
 
-    user = User.first
+    user = User.first!
     challenge = Challenge.find_by!(slug: "n_plus_one_dashboard")
 
     puts "=" * 60
@@ -83,7 +83,7 @@ namespace :dojo do
 
   desc "Show run history and remaining credits"
   task status: :environment do
-    user = User.first
+    user = User.first!
     challenge = Challenge.find_by!(slug: "n_plus_one_dashboard")
     logs = RunLog.where(user: user, challenge: challenge).order(:iteration_number)
 

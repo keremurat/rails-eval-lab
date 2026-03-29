@@ -6,19 +6,23 @@ class Scorer
   def self.run(challenge)
     query_count = 0
 
+    ignored_sql = %w[BEGIN COMMIT SAVEPOINT RELEASE\ SAVEPOINT ROLLBACK].freeze
+
     subscriber = ActiveSupport::Notifications.subscribe('sql.active_record') do |*args|
       event = ActiveSupport::Notifications::Event.new(*args)
       # Ignore schema and transaction queries
-      unless event.payload[:name] == 'SCHEMA' || ['BEGIN', 'COMMIT'].include?(event.payload[:sql])
+      unless event.payload[:name] == 'SCHEMA' || ignored_sql.any? { |q| event.payload[:sql].start_with?(q) }
         query_count += 1
       end
     end
 
-    time = Benchmark.realtime do
-      UserDataFetcher.new.call
+    begin
+      time = Benchmark.realtime do
+        UserDataFetcher.new.call
+      end
+    ensure
+      ActiveSupport::Notifications.unsubscribe(subscriber)
     end
-
-    ActiveSupport::Notifications.unsubscribe(subscriber)
 
     {
       queries: query_count,
